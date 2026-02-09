@@ -25,3 +25,13 @@ replay_pid*
 
 # Kotlin Gradle plugin data, see https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects
 .kotlin/
+# Node / Capacitor
+node_modules/
+www/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+# Generated Android binary assets (do not commit)
+android/app/src/main/res/**/splash.png
+android/app/src/main/res/mipmap-*/ic_launcher*.png

@@ -1,0 +1,21 @@
+{
+  "name": "kotlin_course",
+  "version": "1.0.0",
+  "description": "Мобильное веб-приложение (PWA) для Android-браузера, которое помогает контролировать **среднюю скорость** на трассе и снижает риск штрафа.",
+  "main": "app.js",
+  "scripts": {
+    "copy:web": "mkdir -p www && cp index.html app.js styles.css manifest.json service-worker.js www/",
+    "cap:sync": "npm run copy:web && npx cap sync android",
+    "build:apk": "npm run cap:sync && cd android && ./gradlew assembleDebug"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@capacitor/android": "^8.0.2",
+    "@capacitor/cli": "^8.0.2",
+    "@capacitor/core": "^8.0.2",
+    "typescript": "^5.9.3"
+  }
+}

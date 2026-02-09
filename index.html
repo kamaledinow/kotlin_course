@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Highway Avg Guard</title>
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <h1>Highway Avg Guard</h1>
+    <p class="subtitle">Контроль средней скорости с голосовыми подсказками каждые 5 минут.</p>
+
+    <section class="panel metrics">
+      <div><span>Текущая:</span><strong id="currentSpeed">0 км/ч</strong></div>
+      <div><span>Средняя:</span><strong id="avgSpeed">0 км/ч</strong></div>
+      <div><span>Дистанция:</span><strong id="distance">0.00 км</strong></div>
+      <div><span>Время:</span><strong id="elapsed">00:00:00</strong></div>
+    </section>
+
+    <section class="panel controls">
+      <label>
+        Порог штрафа (средняя), км/ч
+        <input id="limitSpeed" type="number" min="60" max="150" value="120" />
+      </label>
+      <label>
+        Цель с запасом, км/ч
+        <input id="safeTarget" type="number" min="60" max="150" value="119" />
+      </label>
+      <label>
+        Скорость восстановления, км/ч
+        <input id="recoverySpeed" type="number" min="40" max="120" value="80" />
+      </label>
+
+      <div class="buttons">
+        <button id="startBtn">Старт</button>
+        <button id="stopBtn" disabled>Стоп</button>
+        <button id="resetBtn">Сброс</button>
+      </div>
+    </section>
+
+    <section class="panel advisory">
+      <h2>Рекомендация</h2>
+      <p id="adviceText">Нажмите «Старт» и разрешите геолокацию.</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

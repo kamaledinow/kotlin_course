@@ -1,5 +1,6 @@
 const state = {
   watchId: null,
+  watchProvider: null,
   startTime: null,
   elapsedSec: 0,
   distanceKm: 0,
@@ -104,8 +105,7 @@ function render() {
   ui.avgSpeed.textContent = `${state.avgKmh.toFixed(1)} км/ч`;
   ui.distance.textContent = `${state.distanceKm.toFixed(2)} км`;
   ui.elapsed.textContent = formatTime(state.elapsedSec);
-  const advice = getAdvice();
-  ui.adviceText.textContent = advice;
+  ui.adviceText.textContent = getAdvice();
 }
 
 function onPosition(position) {
@@ -143,27 +143,50 @@ function onPosition(position) {
 }
 
 function onError(err) {
-  ui.adviceText.textContent = `Ошибка геолокации: ${err.message}`;
+  ui.adviceText.textContent = `Ошибка геолокации: ${err.message || 'нет доступа к геолокации'}`;
 }
 
-function start() {
+function getCapacitorGeolocationPlugin() {
+  return window.Capacitor?.Plugins?.Geolocation || null;
+}
+
+async function startWebGeolocation() {
   if (!navigator.geolocation) {
-    ui.adviceText.textContent = 'Геолокация не поддерживается в этом браузере.';
-    return;
+    throw new Error('Геолокация не поддерживается в этом браузере.');
   }
 
-  if (!state.startTime) {
-    state.startTime = Date.now();
-  } else {
-    state.startTime = Date.now() - state.elapsedSec * 1000;
-  }
-
-  state.watchId = navigator.geolocation.watchPosition(onPosition, onError, {
+  const watchId = navigator.geolocation.watchPosition(onPosition, onError, {
     enableHighAccuracy: true,
     maximumAge: 1000,
     timeout: 10000,
   });
 
+  return { watchId, provider: 'web' };
+}
+
+async function startCapacitorGeolocation(plugin) {
+  const permission = await plugin.requestPermissions();
+  const granted = ['granted', 'prompt-with-rationale'];
+  if (!granted.includes(permission.location)) {
+    throw new Error('Нет разрешения на геолокацию в Android-приложении.');
+  }
+
+  const watchId = await plugin.watchPosition(
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 },
+    (pos, err) => {
+      if (err) {
+        onError(err);
+        return;
+      }
+      if (!pos) return;
+      onPosition({ coords: pos.coords, timestamp: pos.timestamp || Date.now() });
+    },
+  );
+
+  return { watchId, provider: 'capacitor' };
+}
+
+function startCommonTimers() {
   state.timerId = setInterval(() => {
     state.elapsedSec = Math.floor((Date.now() - state.startTime) / 1000);
     const h = state.elapsedSec / 3600;
@@ -172,28 +195,61 @@ function start() {
   }, 1000);
 
   state.voiceIntervalId = setInterval(() => {
-    const advice = getAdvice();
-    speak(advice);
+    speak(getAdvice());
   }, 5 * 60 * 1000);
-
-  speak('Мониторинг начат. Голосовые подсказки каждые 5 минут.');
-  ui.startBtn.disabled = true;
-  ui.stopBtn.disabled = false;
 }
 
-function stop() {
-  if (state.watchId !== null) navigator.geolocation.clearWatch(state.watchId);
-  clearInterval(state.timerId);
-  clearInterval(state.voiceIntervalId);
-  state.watchId = null;
-  state.timerId = null;
-  state.voiceIntervalId = null;
-  ui.startBtn.disabled = false;
-  ui.stopBtn.disabled = true;
+async function start() {
+  try {
+    const plugin = getCapacitorGeolocationPlugin();
+
+    if (!state.startTime) {
+      state.startTime = Date.now();
+    } else {
+      state.startTime = Date.now() - state.elapsedSec * 1000;
+    }
+
+    const tracking = plugin
+      ? await startCapacitorGeolocation(plugin)
+      : await startWebGeolocation();
+
+    state.watchId = tracking.watchId;
+    state.watchProvider = tracking.provider;
+    startCommonTimers();
+    speak('Мониторинг начат. Голосовые подсказки каждые 5 минут.');
+    ui.startBtn.disabled = true;
+    ui.stopBtn.disabled = false;
+  } catch (error) {
+    onError(error);
+  }
 }
 
-function reset() {
-  stop();
+async function stop() {
+  try {
+    if (state.watchId !== null) {
+      if (state.watchProvider === 'capacitor') {
+        const plugin = getCapacitorGeolocationPlugin();
+        if (plugin) {
+          await plugin.clearWatch({ id: state.watchId });
+        }
+      } else if (navigator.geolocation) {
+        navigator.geolocation.clearWatch(state.watchId);
+      }
+    }
+  } finally {
+    clearInterval(state.timerId);
+    clearInterval(state.voiceIntervalId);
+    state.watchId = null;
+    state.watchProvider = null;
+    state.timerId = null;
+    state.voiceIntervalId = null;
+    ui.startBtn.disabled = false;
+    ui.stopBtn.disabled = true;
+  }
+}
+
+async function reset() {
+  await stop();
   state.startTime = null;
   state.elapsedSec = 0;
   state.distanceKm = 0;
@@ -204,9 +260,15 @@ function reset() {
   render();
 }
 
-ui.startBtn.addEventListener('click', start);
-ui.stopBtn.addEventListener('click', stop);
-ui.resetBtn.addEventListener('click', reset);
+ui.startBtn.addEventListener('click', () => {
+  start();
+});
+ui.stopBtn.addEventListener('click', () => {
+  stop();
+});
+ui.resetBtn.addEventListener('click', () => {
+  reset();
+});
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js').catch(() => {

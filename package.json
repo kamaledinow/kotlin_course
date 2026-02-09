@@ -16,6 +16,7 @@
     "@capacitor/android": "^8.0.2",
     "@capacitor/cli": "^8.0.2",
     "@capacitor/core": "^8.0.2",
+    "@capacitor/geolocation": "^8.0.0",
     "typescript": "^5.9.3"
   }
 }

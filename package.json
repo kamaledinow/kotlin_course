@@ -18,8 +18,5 @@
     "@capacitor/core": "^8.0.2",
     "@capacitor/geolocation": "^8.0.0",
     "typescript": "^5.9.3"
-  },
-  "engines": {
-    "node": ">=22.0.0"
   }
 }

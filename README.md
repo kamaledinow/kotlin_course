@@ -72,21 +72,6 @@ APK появится в: `android/app/build/outputs/apk/debug/app-debug.apk`.
 2. Скачать артефакт `highway-avg-guard-debug-apk` и установить `app-debug.apk` на устройство.
 3. При первом запуске дать разрешение на геолокацию.
 
-## Требования к Node.js для сборки APK
-Capacitor CLI (v8) требует **Node.js >= 22.0.0**.
-
-Если видите ошибку:
-`[fatal] The Capacitor CLI requires NodeJS >=22.0.0`
-
-Используйте Node 22:
-```bash
-nvm install 22
-nvm use 22
-node -v
-```
-
-Для GitHub Actions в workflow уже зафиксирован `node-version: 22`.
-
 ## Ограничения
 - Точность зависит от качества GPS и частоты обновления координат.
 - Расчёты являются ориентировочными и не заменяют дорожные знаки и ПДД.

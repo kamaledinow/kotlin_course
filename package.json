@@ -1,25 +1,17 @@
 {
-  "name": "kotlin_course",
-  "version": "1.0.0",
-  "description": "Мобильное веб-приложение (PWA) для Android-браузера, которое помогает контролировать **среднюю скорость** на трассе и снижает риск штрафа.",
+  "name": "resume-builder",
+  "version": "0.1.0",
+  "description": "Minimal resume builder powered by Editor.js",
   "main": "app.js",
   "scripts": {
-    "copy:web": "mkdir -p www && cp index.html app.js styles.css manifest.json service-worker.js www/",
-    "cap:sync": "npm run copy:web && npx cap sync android",
-    "build:apk": "npm run cap:sync && cd android && ./gradlew assembleDebug"
+    "start": "python3 -m http.server 8080",
+    "test": "node -e \"console.log('No automated tests yet')\""
   },
-  "keywords": [],
+  "keywords": [
+    "resume",
+    "editorjs",
+    "pdf"
+  ],
   "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "devDependencies": {
-    "@capacitor/android": "^8.0.2",
-    "@capacitor/cli": "^8.0.2",
-    "@capacitor/core": "^8.0.2",
-    "@capacitor/geolocation": "^8.0.0",
-    "typescript": "^5.9.3"
-  },
-  "engines": {
-    "node": ">=22.0.0"
-  }
+  "license": "MIT"
 }
